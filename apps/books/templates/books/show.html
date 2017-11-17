@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Book and Likes Show</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"> {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="{% static 'books/css/styles.css'%}">
+
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-wrapper deep-purple darken-2">
+            <a class="brand-logo center" href="/">Books and Likes</a>
+            {% if logged == True %}
+            <ul id="nav-mobile" class="left hide-on-med-and-down">
+                <li>
+                    <a>Welcome {{user.username}}</a>
+                </li>
+                <li>
+                    <a href="../logout">Logout</a>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+
+    </nav>
+    <div class="container">
+        <h1>{{show.username}}</h1>
+        <div class="row">
+            <div class="col s4">
+                <h5 class="header">Books uploaded:</h5>
+            </div>
+            <div class="col s8">
+                {% for b in show.books_uploaded.all %}
+                <h5>{{b.name}}</h5>
+                <p>{{b.desc}}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s4">
+                <h5 class="header">Friends:</h5>
+            </div>
+            <div class="col s8">
+                {% for f in show.friendships.all %}
+                <h5>{{f.username}}</h5>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

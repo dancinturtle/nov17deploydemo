@@ -1,38 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title></title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        
-    </head>
-    <body>
 
-        <h1>This is books and likes</h1>
-        <h3>All the books</h3>
-        {% for book in allbooks %}
-        <p>{{book.name}}, {{book.desc}}, uploaded by {{book.uploader.first_name}} {{book.uploader.last_name}}</p>
+<head>
+    <title>Books and Likes</title>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="{% static 'books/css/styles.css'%}">
+
+
+</head>
+
+<body>
+
+
+    <nav>
+        <div class="nav-wrapper deep-purple darken-2">
+            <a class="brand-logo center">Books and Likes</a>
+            {% if logged == True %}
+            <ul id="nav-mobile" class="left hide-on-med-and-down">
+                <li><a>Welcome {{user.username}}</a></li>
+                <li><a href="../logout">Logout</a></li>
+            </ul>
+            {% endif %}
+        </div>
+
+    </nav>
+    <div class="container">
+
+        {% if logged == False %}
+        <div class="row">
+            <div class="col s12 m6">
+                <div class="card deep-purple lighten-2">
+                    <div class="card-content white-text">
+                        <p class="card-title">Join us! </p>
+                        <div class="row">
+
+                            <form action="/join" method="post">
+                                {% csrf_token %}
+                                <div class="input-field col s8">
+                                    <input id="username" type="text" name="username">
+                                    <label for="username" class="active">Username</label>
+                                </div>
+                                <div class="input-field col s4">
+                                    <button type="submit" class="amber lighten-2 waves-effect waves-light btn">Submit</button>
+                                </div>
+    
+                            </form>
+                        </div>
+                       <p >We only need your username.</p>
+                    </div>
+                    
+                </div>
+                {% if messages %}
+                {% for m in messages %}
+                <p {% if m.tags %}class={{m.tags}} {% endif %}>{{m}}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% if logged == True %}
+        <h3 class="heaader deep-purple-text text-darken-2">Add a book to our database</h3>
+        {% if messages %}
+        {% for m in messages %}
+        <p {% if m.tags %}class={{m.tags}} {% endif %}>{{m}}</p>
         {% endfor %}
-        <h3>The uploader of the first book</h3>
-        <p>{{first_uploader.first_name}} {{first_uploader.last_name}}</p>
-        <h3>The books uploaded by the first user (Kermit)</h3>
-        {% for book in books_by_first %}
-        <p>{{book.name}}</p>
-        {% endfor %}
-        <h3>The likers of the first book</h3>
-        {% for liker in first_likers %}
-        <p>{{liker.first_name}} {{liker.last_name}}</p>
-        {% endfor %}
-        <h3>All the books liked by the first user</h3>
-        {% for book in first_user_likes %}
-        <p>{{book.name}}</p>
-        {% endfor %}
-        <h3>Friends of Kermit</h3>
-        {% for f in first_friends %}
-        <p>{{f.first_name}} {{f.last_name}}</p>
-        {% endfor %}
-        <h3>Friends of Gonzo</h3>
-        {% for f in gonzo_friends %}
-        <p>{{f.first_name}} {{f.last_name}}</p>
-        {% endfor %}
+        {% endif %}
+
+        <form action="/create" method="post">
+            {% csrf_token %}
+            <div class="row">
+
+                <div class="input-field col s12">
+                    <input id="title" type="text" name="title">
+                    <label for="title" class="active">Title</label>
+                </div>
+            </div>
+            <div class="row">
+
+                <div class="input-field col s12">
+                  <textarea class="materialize-textarea" cols="5" id="desc" name="desc"></textarea>
+                  <label for="desc" class="active">Description</label>
+                </div>
+            </div>
+            <button type="submit" class="deep-purple darken-2 waves-effect waves-light btn">Submit</button>
+
+        </form>
+        
+        {% endif %}
+        
+        
+
+
+        <h3 class="header deep-purple-text text-darken-2">All the books</h3>
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Uploaded by</th>
+                    <th>Likes</th>
+                    {% if logged == True %}
+                    <th>Popularity</th>
+                    <th>Social</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in books %}
+                <tr>
+                    <td>{{b.name}}</td>
+                    <td>{{b.desc}}</td>
+                    <td><a href="show/{{b.uploader.id}}">{{b.uploader.username}}</a></td>
+                    <td>{{b.like_count}}</td>
+                    {% if logged == True and user not in b.likers.all %}
+                    <td><a href="/like/{{b.id}}" class="deep-purple-text">Like</a></td>
+                    {% endif %}
+                    {% if logged == True and user in b.likers.all %}
+                    <td><a href= "/unlike/{{b.id}}" class="deep-purple-text">Unlike</a></td>
+                    {% endif %}
+                    {% if logged == True and user not in b.uploader.friendships.all and user.id != b.uploader.id %}
+                    <td><a href="/friend/{{b.uploader.id}}" class="deep-purple-text">I know that uploader!</a></td>
+                    {% endif %}
+                    {% if logged == True and user in b.uploader.friendships.all %}
+                    <td><a href="/unfriend/{{b.uploader.id}}" class="deep-purple-text">I'm not friends with that uploader anymore.</a></td>
+                    {% endif %}
+
+
+                </tr>
+                {% endfor %}
+            </tbody>
+           
+        </table>
+
+    </div>
+
 </html>
